@@ -14,21 +14,29 @@
         >{{ answer }}</b-list-group-item>
       </b-list-group>
 
-      <b-button variant="primary">Submit</b-button>
+      <b-button
+        variant="primary"
+        v-on:click="submitAnswer"
+        :disabled="selectedIndex === null"
+      >Submit</b-button>
       <b-button v-on:click="next" variant="success">Next</b-button>
     </b-jumbotron>
   </div>
 </template>
 
 <script>
+import _ from "lodash";
+
 export default {
   props: {
     currentQuestion: Object,
-    next: Function
+    next: Function,
+    increment: Function
   },
   data() {
     return {
-      selectedIndex: null
+      selectedIndex: null,
+      suffledAnswers: []
     };
   },
   computed: {
@@ -39,24 +47,37 @@ export default {
     }
   },
   watch: {
-    currentQuestion() {
-      this.selectedIndex = null;
-      this.suffleAnswers();
+    // Watch will run whenever props changes
+    currentQuestion: {
+      immediate: true,
+      handler() {
+        this.selectedIndex = null;
+        this.suffleAnswers();
+      }
     }
+    // currentQuestion() {
+    //   this.selectedIndex = null;
+    //   this.suffleAnswers();
+    // }
   },
   methods: {
     selectAnswer(index) {
       this.selectedIndex = index;
+    },
+    submitAnswer() {
+      let isCorrect = false;
+      if (this.selectedIndex === this.correctIndex) {
+        isCorrect = true;
+      }
+      this.increment(isCorrect);
     },
     suffleAnswers() {
       let answers = [
         ...this.currentQuestion.incorrect_answers,
         this.currentQuestion.correct_answer
       ];
+      this.suffledAnswers = _.shuffle(answers);
     }
-  },
-  mounted() {
-    console.log(this.currentQuestion);
   }
 };
 </script>
